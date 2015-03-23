@@ -4,8 +4,8 @@ global class RallySync implements Database.Batchable<Integer> {
     String typeName;
     String externalIdField;
     Map<String, String> mappings;
-    Integer pageSize = 10;
     String query;
+    Integer pageSize = 100;
     Integer startingAt = 1;
 
     global RallySync(String apiKey, String typeName, String externalIdField, Map<String, String> mappings, String query) {
