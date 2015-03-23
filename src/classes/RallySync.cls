@@ -7,9 +7,10 @@ global class RallySync implements Database.Batchable<Integer> {
     Integer pageSize = 10;
     Integer startingAt = 1;
 
-    global RallySync(String apiKey, String typeName, Map<String, String> mappings) {
+    global RallySync(String apiKey, String typeName, String externalIdField, Map<String, String> mappings) {
         this.apiKey = apiKey;
         this.typeName = typeName;
+        this.externalIdField = externalIdField;
         this.mappings = mappings;
     }
 
@@ -30,6 +31,9 @@ global class RallySync implements Database.Batchable<Integer> {
                 );
             }
         }
+        // update the existing found, then insert anything without ids since we can't upsert?
+        setIdsFromExternalIds(toInsert);
+        Database.update(toInsert, false);
         Database.insert(toInsert, false);
         // todo handle errors
     }
@@ -44,6 +48,28 @@ global class RallySync implements Database.Batchable<Integer> {
             sobj.put(mappings.get(k), fromMap.get(k));
         }
         return sobj;
+    }
+
+    private void setIdsFromExternalIds(List<SObject> sobjects) {
+        List<String> externalIds = new List<String>();
+        for (SObject sobj : sobjects) {
+            externalIds.add((String)sobj.get(externalIdField));
+        }
+        Map<String, SObject> existing = getExistingSObjects(externalIds);
+        for (SObject sobj : sobjects) {
+            String val = (String)sobj.get(externalIdField);
+            if (existing.containsKey(val)) {
+                sobj.put('Id', existing.get(val).Id);
+            }
+        }
+    }
+
+    private Map<String, SObject> getExistingSObjects(List<String> externalIds) {
+        Map<String, SObject> result = new Map<String, SObject>();
+        for (SObject o : Database.query('select Id, '+externalIdField+' from '+typeName+' where '+externalIdField+' in :externalIds')) {
+            result.put((String)o.get(externalIdField), o);
+        }
+        return result;
     }
 
 }
