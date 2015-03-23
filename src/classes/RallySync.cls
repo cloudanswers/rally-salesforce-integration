@@ -5,13 +5,15 @@ global class RallySync implements Database.Batchable<Integer> {
     String externalIdField;
     Map<String, String> mappings;
     Integer pageSize = 10;
+    String query;
     Integer startingAt = 1;
 
-    global RallySync(String apiKey, String typeName, String externalIdField, Map<String, String> mappings) {
+    global RallySync(String apiKey, String typeName, String externalIdField, Map<String, String> mappings, String query) {
         this.apiKey = apiKey;
         this.typeName = typeName;
         this.externalIdField = externalIdField;
         this.mappings = mappings;
+        this.query = query;
     }
 
     global List<Integer> start(Database.BatchableContext BC) {
@@ -22,7 +24,7 @@ global class RallySync implements Database.Batchable<Integer> {
     global void execute(Database.BatchableContext BC, List<Integer> scope) {
         List<SObject> toInsert = new List<SObject>();
         for (Integer i : scope) {
-            Map<String, Object> apiResult = RallyAPI.getHierarchicalRequirements('', pageSize, startingAt, apiKey);
+            Map<String, Object> apiResult = RallyAPI.getHierarchicalRequirements(query, pageSize, startingAt, apiKey);
             List<Object> results = (List<Object>)apiResult.get('Results');
             for (Object o : results) {
                 Map<String, Object> r = (Map<String, Object>)o;
