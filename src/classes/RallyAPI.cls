@@ -1,35 +1,17 @@
 public with sharing class RallyAPI {
-    
+
     private static String baseUrl = 'https://rally1.rallydev.com/slm/webservice/v2.0';
 
-    public static RallyHierarchicalRequirementWrapper getHierarchicalRequirements (String query, Integer pageSize, Integer startingAt, String apiKey) {
+    public static Map<String, Object> getHierarchicalRequirements (String query, Integer pageSize, Integer startingAt, String apiKey) {
         if (query == null) query = '';
         query = EncodingUtil.urlEncode(query, 'UTF-8');
         if (pageSize == null) pageSize = 200;
         if (startingAt == null) startingAt = 1;
-        return (RallyHierarchicalRequirementWrapper)JSON.deserialize(
-            get('/HierarchicalRequirement?fetch=true&query='+query+'&pagesize='+pageSize+'&start='+startingAt, apiKey).getBody(), 
-            RallyHierarchicalRequirementWrapper.class
-        );
-    }
-    
-    public class RallyHierarchicalRequirement {
-        public String Name;
-        public Double ObjectID;
-        public String Description;
-    }
-    
-    public class RallyHierarchicalRequirementQueryResult {
-        public Integer TotalResultCount;
-        public Integer StartIndex;
-        public Integer PageSize;
-        public RallyHierarchicalRequirement[] Results;
+        String apiResult = get('/HierarchicalRequirement?fetch=true&query=' + query + '&pagesize=' + pageSize + '&start=' + startingAt, apiKey).getBody();
+        Map<String, Object> res = (Map<String, Object>)JSON.deserializeUntyped(apiResult);
+        return (Map<String, Object>)res.get('QueryResult');
     }
 
-    public class RallyHierarchicalRequirementWrapper {
-        public RallyHierarchicalRequirementQueryResult QueryResult;
-    }
-    
     // helpers
 
     @TestVisible
