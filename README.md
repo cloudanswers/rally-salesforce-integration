@@ -6,7 +6,8 @@ Sync Rally data to Salesforce however you want.
       'apikey', // your api key
       'My_Custom_Object__c', // sobject in your system
       'My_ObjectID_Field__c',  // the field you want to use for upsert
-      new Map<String, String>{'Name' => 'Name'}, // field mappings
+      new Map<String, String>{'Name' => 'Name'}, // field mappings,
+      new Map<String, Object>{'Project__c' => '0db000000000833u'}, // literals / defaults
       '(Tags.name = "CloudAnswers")' // rally query for filtering results
     );
 

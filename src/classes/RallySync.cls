@@ -4,19 +4,25 @@ global class RallySync implements Database.Batchable<Integer> {
     String typeName;
     String externalIdField;
     Map<String, String> mappings;
+    Map<String, Object> defaults;
     String query;
     Integer pageSize = 100;
     Integer startingAt = 1;
 
-    public static void run(String apiKey, String typeName, String externalIdField, Map<String, String> mappings, String query) {
-        Database.executeBatch(new RallySync(apiKey, typeName, externalIdField, mappings, query));
+    public static void run(String apiKey, String typeName, String externalIdField, Map<String, String> mappings, Map<String, Object> defaults, String query) {
+        Database.executeBatch(new RallySync(apiKey, typeName, externalIdField, mappings, defaults, query));
     }
 
     global RallySync(String apiKey, String typeName, String externalIdField, Map<String, String> mappings, String query) {
+        System.assert(false, 'deprecated method');
+    }
+
+    global RallySync(String apiKey, String typeName, String externalIdField, Map<String, String> mappings, Map<String, Object> defaults, String query) {
         this.apiKey = apiKey;
         this.typeName = typeName;
         this.externalIdField = externalIdField;
         this.mappings = mappings;
+        this.defaults = defaults;
         this.query = query;
     }
 
@@ -50,6 +56,9 @@ global class RallySync implements Database.Batchable<Integer> {
 
     private SObject makeSObject(Map<String, Object> fromMap) {
         SObject sobj = (SObject)Type.forName(typeName).newInstance();
+        for (String k : defaults.keySet()) {
+            sobj.put(k, defaults.get(k));
+        }
         for (String k : mappings.keySet()) {
             sobj.put(mappings.get(k), fromMap.get(k));
         }

@@ -4,7 +4,7 @@ private class RallySyncTests {
     @isTest static void testNoRecordsReturned() {
         RallyAPI.getOverride = '{"QueryResult": {"_rallyAPIMajor": "2","_rallyAPIMinor": "0","Errors": [],"Warnings": [],"TotalResultCount": 46,"StartIndex": 1,"PageSize": 100, "Results": []}}';
         // mapping to task because unlikely that dml will have issues
-        RallySync b = new RallySync('asdf', 'Task', 'Subject', new Map<String, String>{}, '');
+        RallySync b = new RallySync('asdf', 'Task', 'Subject', new Map<String, String>{}, new Map<String, String>{}, '');
         b.start(null);
         b.execute(null, new List<Integer>{0});
         b.finish(null);
@@ -17,8 +17,12 @@ private class RallySyncTests {
             'Name' => 'Subject',
             'Description' => 'Description'
         };
+        Map<String, Object> defaults = new Map<String, Object>{
+            'Status' => 'OpenX',
+            'OwnerId' => UserInfo.getUserId()
+        };
 
-        RallySync b = new RallySync('asdf', 'Task', 'Subject', mappings, '');
+        RallySync b = new RallySync('asdf', 'Task', 'Subject', mappings, defaults, '');
         b.start(null);
         b.execute(null, new List<Integer>{0});
         b.finish(null);
@@ -26,7 +30,7 @@ private class RallySyncTests {
         System.assertEquals('Test Name', [select Subject from Task limit 1].Subject);
         System.assertEquals('Test Description', [select Description from Task limit 1].Description);
 
-        b = new RallySync('asdf', 'Task', 'Subject', mappings, '');
+        b = new RallySync('asdf', 'Task', 'Subject', mappings, defaults, '');
         b.start(null);
         b.execute(null, new List<Integer>{0});
         b.finish(null);
